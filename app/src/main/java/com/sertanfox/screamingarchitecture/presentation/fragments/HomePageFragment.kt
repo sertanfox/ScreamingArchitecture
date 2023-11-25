@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.sertanfox.screamingarchitecture.databinding.FragmentHomePageBinding
 import com.sertanfox.screamingarchitecture.presentation.viewmodels.HomePageViewModel
-import com.sertanfox.screamingarchitecture.presentation.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,13 +17,14 @@ class HomePageFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentHomePageBinding.inflate(inflater,container,false)
         initDataBinding()
         return binding.root
     }
 
     private fun initDataBinding(){
+        binding.lifecycleOwner = this
         binding.viewModel = viewModel
     }
 

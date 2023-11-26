@@ -9,3 +9,7 @@ data class SearchDto(
     @SerializedName("total")
     val total: Int
 )
+
+fun SearchDto.toSimple():List<String>{
+    return result.map { it.value }
+}

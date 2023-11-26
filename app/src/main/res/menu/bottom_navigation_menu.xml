@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:title="@string/categories"
+        android:icon="@drawable/fox_splash_screen" />
+
+    <item
+        android:id="@+id/navigation_jokes"
+        android:title="@string/random"
+        android:icon="@drawable/fox_splash_screen" />
+
+    <item
+        android:id="@+id/navigation_notifications"
+        android:title="@string/search"
+        android:icon="@drawable/fox_splash_screen" />
+</menu>

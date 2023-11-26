@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
-        <import type="android.view.View" />
-
+        <import type="android.view.View"/>
         <variable
             name="viewModel"
-            type="com.sertanfox.screamingarchitecture.presentation.viewmodels.CategoriesViewModel" />
+            type="com.sertanfox.screamingarchitecture.presentation.viewmodels.RandomViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,33 +15,36 @@
         android:layout_height="match_parent"
         tools:context=".presentation.fragments.CategoriesFragment">
 
+
         <TextView
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:text="@{viewModel.categoriesState.categories.toString()}"
             android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginHorizontal="20dp"
+            android:text="@{viewModel.randomState.randomJoke.value.toString()}" />
 
         <Button
+            android:text="@string/get_a_random_joke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.getCategoriesButton()}"
-            android:text="@string/get_jokes_categories"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:onClick="@{() -> viewModel.random()}"
+            />
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="@{viewModel.categoriesState.loading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="@{viewModel.randomState.loading ? View.VISIBLE : View.GONE}"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

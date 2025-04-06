@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ScreamingArchitecture"
+rootProject.name = "MyChess"
 include ':app'

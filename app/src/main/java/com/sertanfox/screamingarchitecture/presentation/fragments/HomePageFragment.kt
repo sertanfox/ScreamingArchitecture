@@ -1,20 +1,26 @@
 package com.sertanfox.screamingarchitecture.presentation.fragments
 
+import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.Interpolator
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import com.sertanfox.screamingarchitecture.R
-import com.sertanfox.screamingarchitecture.common.Pawn
-import com.sertanfox.screamingarchitecture.common.Position
-import com.sertanfox.screamingarchitecture.common.Rock
+import com.sertanfox.screamingarchitecture.pieces.Pawn
+import com.sertanfox.screamingarchitecture.pieces.Position
+import com.sertanfox.screamingarchitecture.pieces.Piece
 import com.sertanfox.screamingarchitecture.databinding.FragmentHomePageBinding
+import com.sertanfox.screamingarchitecture.pieces.Bishop
+import com.sertanfox.screamingarchitecture.pieces.King
+import com.sertanfox.screamingarchitecture.pieces.Knight
+import com.sertanfox.screamingarchitecture.pieces.Queen
+import com.sertanfox.screamingarchitecture.pieces.Rook
 import com.sertanfox.screamingarchitecture.presentation.viewmodels.HomePageViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,23 +39,100 @@ class HomePageFragment : Fragment() {
     private val H = 7
     //endregion
 
-    val board: Array<Array<Rock?>> = Array(8) { arrayOfNulls<Rock>(8) }
+    val board: Array<Array<Piece?>> = Array(8) { arrayOfNulls<Piece>(8) }
     var isWhiteTurn = true
-    var lastRock:Rock? = null
-    var lastPos:Position = Position(0,0)
-    var movablePoses:List<Position> = emptyList()
+    var selectedPiece: Piece? = null
+    var selectedPiecePos: Position? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentHomePageBinding.inflate(inflater,container,false)
         initDataBinding()
         setupChessBoard()
-        setupRocksTable()
+        setupPiecesTable()
+        setupMovablesLayer()
+        startTheGame()
         return binding.root
     }
 
-    private fun setupRocksTable() {
+    @SuppressLint("ClickableViewAccessibility")
+    private fun startTheGame() {
+        binding.piecesTable.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                val boardSize = binding.piecesTable.width
+                val tileSize = boardSize / 8
+
+                val clickedCol = (event.x / tileSize).toInt()
+                val clickedRow = (event.y / tileSize).toInt()
+                handleClick(clickedRow, clickedCol)
+            }
+            true
+        }
+    }
+
+    private fun handleClick(row: Int, col: Int) {
+        val piece = board[row][col]
+
+        if(selectedPiece == null){
+            if(piece != null && isYourTurn(piece.isWhite)){
+                selectedPiece = piece
+                selectedPiecePos = Position(row,col)
+                showMovableAreas(piece)
+            }
+        }
+        else {
+            if(row == selectedPiecePos!!.row && col == selectedPiecePos!!.col){
+                //clearMovableAreas()
+            }
+        }
+
+    }
+
+    private fun clearMovableAreas() {
+        for (row in 0 until 8) {
+            for (col in 0 until 8) {
+                val view = binding.movablesLayer.getChildAt(row*8+col) as? ImageView
+                view?.setBackgroundResource(0)
+            }
+        }
+    }
+
+    private fun showMovableAreas(piece: Piece) {
+        when(piece.type) {
+            PieceType.PAWN -> {
+                if(piece.isWhite){
+                    val positionList: ArrayList<Position> = arrayListOf()
+                    positionList.add(Position(selectedPiecePos!!.row-1,selectedPiecePos!!.col))
+                    if(!piece.isEverMoved){
+                        positionList.add(Position(selectedPiecePos!!.row-2,selectedPiecePos!!.col))
+                    }
+                    pointSquaresAsMovable(positionList)
+                } else {
+
+                }
+            }
+        }
+    }
+
+    private fun pointSquaresAsMovable(positions: ArrayList<Position>){
+        for(position in positions){
+            val view = binding.movablesLayer.getChildAt(position.row*8+position.col)
+            view?.setBackgroundResource(R.drawable.white_dot)
+        }
+    }
+
+    private fun passTurn(){
+        isWhiteTurn != isWhiteTurn
+    }
+
+    private fun isYourTurn(isWhite:Boolean):Boolean{
+        return isWhite == isWhiteTurn
+    }
+
+    //region Core Setup Functions
+    private fun setupPiecesTable() {
         val boardSize = resources.displayMetrics.widthPixels
         val tileSize = boardSize / 8
 
@@ -63,74 +146,44 @@ class HomePageFragment : Fragment() {
                     columnSpec = GridLayout.spec(col)
                 }
 
-                square.tag = Pair(row, col)
-                square.setOnClickListener { view ->
-                    val (clickedRow, clickedCol) = view.tag as Pair<Int, Int>
-
-                    var rock = board[clickedRow][clickedCol]
-                    if(rock != null){
-                        if(rock.isWhite == isWhiteTurn){
-                            if(!rock.isSelected){
-                                if(!(lastPos.row == clickedRow && lastPos.col == clickedCol)){
-                                    hideMoves()
-                                }
-
-                                rock.showMoves()
-                                lastRock = rock
-                                movablePoses = rock.movablePositions
-                            }
-                            else if(!isMovable(clickedRow, clickedCol))
-                                hideMoves()
-                            else {
-                                rock.move(clickedRow,clickedCol)
-                                passMoveTurn()
-                            }
-                        }
-                        //TODO: else if(o taşı yiyebiliyor muyum?)
-                        else {
-                            hideMoves()
-                        }
-                    } else {
-                        if(isAnyRockSelected()){
-                            if(isMovable(clickedRow,clickedCol)){
-                                hideMoves()
-                                if(lastRock != null){
-                                    lastRock?.move(clickedRow,clickedCol)
-                                    board[lastRock!!.pos.row][lastRock!!.pos.col] = lastRock
-                                    board[clickedRow][clickedCol] = lastRock
-                                    passMoveTurn()
-                                    movablePoses = emptyList()
-                                }
-                            }
-                            else
-                                hideMoves()
-                        }
-                    }
-                }
-
-
                 if(row < 2){
                     //siyah
                     if(row == 0){
-                        if(col == A)
+                        if(col == A) {
+                            board[row][col] = Rook(isWhite = false)
                             square.setImageResource(R.drawable.black_rook)
-                        else if(col == B)
+                        }
+                        else if(col == B) {
+                            board[row][col] = Knight(isWhite = false)
                             square.setImageResource(R.drawable.black_knight)
-                        else if(col == C)
+                        }
+                        else if(col == C) {
+                            board[row][col] = Bishop(isWhite = false)
                             square.setImageResource(R.drawable.black_bishop)
-                        else if(col == D)
+                        }
+                        else if(col == D) {
+                            board[row][col] = King(isWhite = false)
                             square.setImageResource(R.drawable.black_king)
-                        else if(col == E)
+                        }
+                        else if(col == E) {
+                            board[row][col] = Queen(isWhite = false)
                             square.setImageResource(R.drawable.black_queen)
-                        else if(col == F)
+                        }
+                        else if(col == F) {
+                            board[row][col] = Bishop(isWhite = false)
                             square.setImageResource(R.drawable.black_bishop)
-                        else if(col == G)
+                        }
+                        else if(col == G) {
+                            board[row][col] = Knight(isWhite = false)
                             square.setImageResource(R.drawable.black_knight)
-                        else if(col == H)
+                        }
+                        else if(col == H){
+                            board[row][col] = Rook(isWhite = false)
                             square.setImageResource(R.drawable.black_rook)
+                        }
                     }
                     else if(row == 1) {
-                        board[row][col] = Pawn(isWhite = false, Position(row,col), binding.rocksTable)
+                        board[row][col] = Pawn(isWhite = false)
                         square.setImageResource(R.drawable.black_pawn)
                     }
 
@@ -138,42 +191,55 @@ class HomePageFragment : Fragment() {
                 else if(row > 5){
                     //beyaz
                     if(row == 7){
-                       if(col == A)
+                       if(col == A) {
+                           board[row][col] = Rook(isWhite = true)
                            square.setImageResource(R.drawable.white_rook)
-                       else if(col == B)
+                       }
+                       else if(col == B) {
+                           board[row][col] = Knight(isWhite = true)
                            square.setImageResource(R.drawable.white_knight)
-                       else if(col == C)
+                       }
+                       else if(col == C) {
+                           board[row][col] = Bishop(isWhite = true)
                            square.setImageResource(R.drawable.white_bishop)
-                       else if(col == D)
+                       }
+                       else if(col == D) {
+                           board[row][col] = King(isWhite = true)
                            square.setImageResource(R.drawable.white_king)
-                       else if(col == E)
+                       }
+                       else if(col == E) {
+                           board[row][col] = Queen(isWhite = true)
                            square.setImageResource(R.drawable.white_queen)
-                       else if(col == F)
+                       }
+                       else if(col == F) {
+                           board[row][col] = Bishop(isWhite = true)
                            square.setImageResource(R.drawable.white_bishop)
-                       else if(col == G)
+                       }
+                       else if(col == G) {
+                           board[row][col] = King(isWhite = true)
                            square.setImageResource(R.drawable.white_knight)
-                       else if(col == H)
+                       }
+                       else if(col == H) {
+                           board[row][col] = Rook(isWhite = true)
                            square.setImageResource(R.drawable.white_rook)
+                       }
 
                     }
                     else if(row == 6) {
-                        board[row][col] = Pawn(isWhite = true, Position(row,col), binding.rocksTable)
+                        board[row][col] = Pawn(isWhite = true)
                         square.setImageResource(R.drawable.white_pawn)
                     }
 
                 }
 
                 square.layoutParams = params
-                binding.rocksTable.addView(square)
+                binding.piecesTable.addView(square)
             }
         }
 
     }
 
-    private fun passMoveTurn(){
-        isWhiteTurn != isWhiteTurn
-    }
-
+    @SuppressLint("UseKtx")
     private fun setupChessBoard(){
         val boardSize = resources.displayMetrics.widthPixels
         val tileSize = boardSize / 8
@@ -200,47 +266,44 @@ class HomePageFragment : Fragment() {
         }
     }
 
+    private fun setupMovablesLayer(){
+        val boardSize = resources.displayMetrics.widthPixels
+        val tileSize = boardSize / 8
+
+        for (row in 0 until 8) {
+            for (col in 0 until 8) {
+                val square = View(requireActivity())
+                val params = GridLayout.LayoutParams().apply {
+                    width = tileSize
+                    height = tileSize
+                    rowSpec = GridLayout.spec(row)
+                    columnSpec = GridLayout.spec(col)
+                }
+
+                square.setBackgroundColor(
+                    Color.parseColor("#00FFFFFF")
+                )
+
+                square.layoutParams = params
+                binding.movablesLayer.addView(square)
+            }
+        }
+    }
+
+
     private fun initDataBinding(){
         binding.viewModel = viewModel
     }
+    //endregion
+}
 
-    private fun isMovable(row:Int, col:Int):Boolean{
-        for(pos in movablePoses){
-            if(pos.row == row && pos.col == col)
-                return true
-        }
-        return false
-    }
-
-    private fun hideMoves(){
-        for(pos in movablePoses){
-            val view = binding.rocksTable.getChildAt(pos.row*8+pos.col) as? ImageView
-            view?.setBackgroundResource(0)
-        }
-
-        getSelectedRock()?.isSelected = false
-        movablePoses = emptyList()
-    }
-
-    private fun isAnyRockSelected():Boolean {
-        for(rows in board){
-            for(rock in rows){
-                if(rock != null && rock.isSelected)
-                    return true
-            }
-        }
-
-        return false
-    }
-
-    private fun getSelectedRock():Rock?{
-        for(rows in board){
-            for(rock in rows){
-                if(rock != null && rock.isSelected)
-                    return rock
-            }
-        }
-
-        return null
+class PieceType(val id: Int) {
+    companion object Companion {
+        val PAWN = PieceType(0)
+        val ROOK = PieceType(1)
+        val KNIGHT = PieceType(2)
+        val BISHOP = PieceType(3)
+        val QUEEN = PieceType(4)
+        val KING = PieceType(5)
     }
 }

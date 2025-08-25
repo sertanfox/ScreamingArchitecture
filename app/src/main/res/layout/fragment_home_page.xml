@@ -17,8 +17,9 @@
 
         <GridLayout
             android:id="@+id/chessBoard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,9 +30,24 @@
         </GridLayout>
 
         <GridLayout
-            android:id="@+id/rocks_table"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/pieces_table"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:columnCount="8"
+            android:rowCount="8"
+            >
+        </GridLayout>
+
+        <GridLayout
+            android:id="@+id/movablesLayer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

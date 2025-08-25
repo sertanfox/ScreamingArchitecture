@@ -1,4 +1,4 @@
-package com.sertanfox.screamingarchitecture.common
+package com.sertanfox.screamingarchitecture.pieces
 
 data class Position(
     var row:Int,

@@ -39,6 +39,8 @@ class HomePageFragment : Fragment() {
     private val H = 7
     //endregion
 
+    private var tempPosList: ArrayList<Position> = arrayListOf()
+    private var movableAreas: ArrayList<Position> = arrayListOf()
     val board: Array<Array<Piece?>> = Array(8) { arrayOfNulls<Piece>(8) }
     var isWhiteTurn = true
     var selectedPiece: Piece? = null
@@ -75,40 +77,105 @@ class HomePageFragment : Fragment() {
     private fun handleClick(row: Int, col: Int) {
         val piece = board[row][col]
 
-        if(selectedPiece == null){
-            if(piece != null && isYourTurn(piece.isWhite)){
-                selectedPiece = piece
-                selectedPiecePos = Position(row,col)
-                showMovableAreas(piece)
+        if(!isMovablesExists()){ // A piece is not selected yet
+            if(isPlayablePiece(piece)){
+                selectNewPiece(piece!!,Position(row,col))
             }
         }
-        else {
-            if(row == selectedPiecePos!!.row && col == selectedPiecePos!!.col){
-                //clearMovableAreas()
+        else { // A piece already selected
+            val secondSelectedPos = Position(row,col)
+            if(isMovable(secondSelectedPos)){
+                movePiece(secondSelectedPos)
+            }
+            else {
+                clearMovableAreas()
+                if(isPlayablePiece(piece)){
+                    if(selectedPiecePos != secondSelectedPos){
+                        selectNewPiece(piece!!, secondSelectedPos)
+                    }
+                }
             }
         }
 
     }
 
+    private fun movePiece(newPosition: Position){
+        clearMovableAreas()
+        clearPieceOldSquare()
+        setPieceNewSquare(newPosition)
+        clearPieceSelection()
+    }
+
+    private fun clearPieceSelection() {
+        selectedPiece = null
+        selectedPiecePos = null
+    }
+
+    private fun clearPieceOldSquare() {
+        //TODO: Neden taşın ilk konumundaki görseli temizlemiyor?
+        val index = selectedPiecePos!!.row*8+selectedPiecePos!!.col
+        val view = binding.piecesTable.getChildAt(index)
+        view!!.setBackgroundResource(0)
+        board[selectedPiecePos!!.row][selectedPiecePos!!.col] = null
+    }
+
+    private fun setPieceNewSquare(newPos:Position) {
+        val index = newPos.row*8+newPos.col
+        if(selectedPiece!!.type == PieceType.PAWN){
+            if(selectedPiece!!.isWhite){
+                val view = binding.piecesTable.getChildAt(index)
+                view?.setBackgroundResource(R.drawable.white_pawn)
+                selectedPiece?.isEverMoved = true
+                board[newPos.row][newPos.col] = selectedPiece
+            } else {
+                val view = binding.piecesTable.getChildAt(index)
+                view?.setBackgroundResource(R.drawable.black_pawn)
+                selectedPiece?.isEverMoved = true
+                board[newPos.row][newPos.col] = selectedPiece
+            }
+        }
+    }
+
+
+    private fun selectNewPiece(piece: Piece, position: Position) {
+        selectedPiece = piece
+        selectedPiecePos = position
+        showMovableAreas(piece)
+    }
+
+    private fun isPlayablePiece(piece: Piece?): Boolean {
+        return piece != null && isYourPiece(piece.isWhite)
+    }
+
+
+    private fun isMovable(position: Position): Boolean {
+        return movableAreas.contains(position)
+    }
+
+    private fun isMovablesExists():Boolean{
+        return movableAreas.size > 0
+    }
+
     private fun clearMovableAreas() {
         for (row in 0 until 8) {
             for (col in 0 until 8) {
-                val view = binding.movablesLayer.getChildAt(row*8+col) as? ImageView
+                val view = binding.movablesLayer.getChildAt(row*8+col)
                 view?.setBackgroundResource(0)
             }
         }
+
+        movableAreas.clear()
     }
 
     private fun showMovableAreas(piece: Piece) {
         when(piece.type) {
             PieceType.PAWN -> {
                 if(piece.isWhite){
-                    val positionList: ArrayList<Position> = arrayListOf()
-                    positionList.add(Position(selectedPiecePos!!.row-1,selectedPiecePos!!.col))
+                    tempPosList.add(Position(selectedPiecePos!!.row-1,selectedPiecePos!!.col))
                     if(!piece.isEverMoved){
-                        positionList.add(Position(selectedPiecePos!!.row-2,selectedPiecePos!!.col))
+                        tempPosList.add(Position(selectedPiecePos!!.row-2,selectedPiecePos!!.col))
                     }
-                    pointSquaresAsMovable(positionList)
+                    pointSquaresAsMovable(ArrayList(tempPosList))
                 } else {
 
                 }
@@ -117,17 +184,32 @@ class HomePageFragment : Fragment() {
     }
 
     private fun pointSquaresAsMovable(positions: ArrayList<Position>){
+        clearMovableAreas()
+        setMovableAreas(positions)
         for(position in positions){
             val view = binding.movablesLayer.getChildAt(position.row*8+position.col)
             view?.setBackgroundResource(R.drawable.white_dot)
         }
+        clearTempPosList()
+    }
+
+    private fun clearTempPosList(){
+        tempPosList.clear()
+    }
+
+    private fun setMovableAreas(positionList: ArrayList<Position>){
+        movableAreas = ArrayList(positionList)
+    }
+
+    private fun addToMovableAreasList(position: Position){
+        movableAreas.add(position)
     }
 
     private fun passTurn(){
         isWhiteTurn != isWhiteTurn
     }
 
-    private fun isYourTurn(isWhite:Boolean):Boolean{
+    private fun isYourPiece(isWhite:Boolean):Boolean{
         return isWhite == isWhiteTurn
     }
 
@@ -305,5 +387,18 @@ class PieceType(val id: Int) {
         val BISHOP = PieceType(3)
         val QUEEN = PieceType(4)
         val KING = PieceType(5)
+    }
+}
+
+class MoveRotation(val id: Int) {
+    companion object Companion {
+        val LEFT = MoveRotation(0)
+        val RIGHT = MoveRotation(1)
+        val UP = MoveRotation(2)
+        val DOWN = MoveRotation(3)
+        val LEFT_UP = MoveRotation(4)
+        val RIGHT_UP = MoveRotation(5)
+        val LEFT_DOWN = MoveRotation(6)
+        val RIGHT_DOWN = MoveRotation(7)
     }
 }

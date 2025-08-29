@@ -76,27 +76,37 @@ class HomePageFragment : Fragment() {
 
     private fun handleClick(row: Int, col: Int) {
         val piece = board[row][col]
+        val selectedPos = Position(row,col)
 
-        if(!isMovablesExists()){ // A piece is not selected yet
+        if(!isMovablesExists() && selectedPiece == null){ // A piece is not selected yet
             if(isPlayablePiece(piece)){
                 selectNewPiece(piece!!,Position(row,col))
             }
         }
         else { // A piece already selected
-            val secondSelectedPos = Position(row,col)
-            if(isMovable(secondSelectedPos)){
-                movePiece(secondSelectedPos)
+            if(isMovable(selectedPos)){
+                movePiece(selectedPos)
             }
             else {
                 clearMovableAreas()
-                if(isPlayablePiece(piece)){
-                    if(selectedPiecePos != secondSelectedPos){
-                        selectNewPiece(piece!!, secondSelectedPos)
-                    }
+                if(isPlayablePiece(piece) && !isSamePiece(selectedPos)){
+                    selectNewPiece(piece!!, selectedPos)
+                }
+                else {
+                    clearSelectedPiece()
                 }
             }
         }
 
+    }
+
+    private fun isSamePiece(position: Position):Boolean {
+        return selectedPiecePos == position
+    }
+
+    private fun clearSelectedPiece(){
+        selectedPiece = null
+        selectedPiecePos = null
     }
 
     private fun movePiece(newPosition: Position){
@@ -104,6 +114,7 @@ class HomePageFragment : Fragment() {
         clearPieceOldSquare()
         setPieceNewSquare(newPosition)
         clearPieceSelection()
+        passTurn()
     }
 
     private fun clearPieceSelection() {
@@ -120,21 +131,64 @@ class HomePageFragment : Fragment() {
 
     private fun setPieceNewSquare(newPos:Position) {
         val index = newPos.row*8+newPos.col
-        if(selectedPiece!!.type == PieceType.PAWN){
-            if(selectedPiece!!.isWhite){
-                val view = binding.piecesTable.getChildAt(index)
-                view?.setBackgroundResource(R.drawable.white_pawn)
-                selectedPiece?.isEverMoved = true
-                board[newPos.row][newPos.col] = selectedPiece
-            } else {
-                val view = binding.piecesTable.getChildAt(index)
-                view?.setBackgroundResource(R.drawable.black_pawn)
-                selectedPiece?.isEverMoved = true
-                board[newPos.row][newPos.col] = selectedPiece
+        val view = binding.piecesTable.getChildAt(index)
+        view?.setBackgroundResource(pieceTypeImage())
+        selectedPiece?.isEverMoved = true
+        board[newPos.row][newPos.col] = selectedPiece
+    }
+
+    private fun pieceTypeImage(): Int {
+        return if(selectedPiece!!.isWhite){
+            when(selectedPiece!!.type){
+                PieceType.PAWN -> {
+                    R.drawable.white_pawn
+                }
+                PieceType.ROOK -> {
+                    R.drawable.white_rook
+                }
+                PieceType.KNIGHT -> {
+                    R.drawable.white_knight
+                }
+                PieceType.BISHOP -> {
+                    R.drawable.white_bishop
+                }
+                PieceType.QUEEN -> {
+                    R.drawable.white_queen
+                }
+                PieceType.KING -> {
+                    R.drawable.white_king
+                }
+                else -> {
+                    0
+                }
+            }
+        }
+        else {
+            when(selectedPiece!!.type){
+                PieceType.PAWN -> {
+                    R.drawable.black_pawn
+                }
+                PieceType.ROOK -> {
+                    R.drawable.black_rook
+                }
+                PieceType.KNIGHT -> {
+                    R.drawable.black_knight
+                }
+                PieceType.BISHOP -> {
+                    R.drawable.black_bishop
+                }
+                PieceType.QUEEN -> {
+                    R.drawable.black_queen
+                }
+                PieceType.KING -> {
+                    R.drawable.black_king
+                }
+                else -> {
+                    0
+                }
             }
         }
     }
-
 
     private fun selectNewPiece(piece: Piece, position: Position) {
         selectedPiece = piece
@@ -169,17 +223,133 @@ class HomePageFragment : Fragment() {
     private fun showMovableAreas(piece: Piece) {
         when(piece.type) {
             PieceType.PAWN -> {
-                if(piece.isWhite){
-                    tempPosList.add(Position(selectedPiecePos!!.row-1,selectedPiecePos!!.col))
-                    if(!piece.isEverMoved){
-                        tempPosList.add(Position(selectedPiecePos!!.row-2,selectedPiecePos!!.col))
-                    }
-                    pointSquaresAsMovable(ArrayList(tempPosList))
-                } else {
+                if(isPawnAllowedToMove()){
+                    if(piece.isWhite){
 
+                        val leftUpPiece = if(selectedPiecePos!!.col != 0)
+                            board[selectedPiecePos!!.row-1][selectedPiecePos!!.col-1]
+                        else
+                            null
+
+                        val rightUpPiece = if(selectedPiecePos!!.col != 7)
+                            board[selectedPiecePos!!.row-1][selectedPiecePos!!.col+1]
+                        else
+                            null
+
+                        tempPosList.add(Position(selectedPiecePos!!.row-1,selectedPiecePos!!.col))
+                        if(!piece.isEverMoved && board[selectedPiecePos!!.row-2][selectedPiecePos!!.col] == null){
+                            tempPosList.add(Position(selectedPiecePos!!.row-2,selectedPiecePos!!.col))
+                        }
+
+                        if(leftUpPiece != null && !isYourPiece(leftUpPiece.isWhite))
+                            tempPosList.add(Position(selectedPiecePos!!.row-1, selectedPiecePos!!.col-1))
+
+                        if(rightUpPiece != null && !isYourPiece(rightUpPiece.isWhite))
+                            tempPosList.add(Position(selectedPiecePos!!.row-1, selectedPiecePos!!.col+1))
+
+                        pointSquaresAsMovable(ArrayList(tempPosList))
+                    } else {
+
+                        val leftDownPiece = if(selectedPiecePos!!.col != 0)
+                            board[selectedPiecePos!!.row+1][selectedPiecePos!!.col-1]
+                        else
+                            null
+
+                        val rightDownPiece = if(selectedPiecePos!!.col != 7)
+                            board[selectedPiecePos!!.row+1][selectedPiecePos!!.col+1]
+                        else
+                            null
+
+                        tempPosList.add(Position(selectedPiecePos!!.row+1,selectedPiecePos!!.col))
+                        if(!piece.isEverMoved && board[selectedPiecePos!!.row+2][selectedPiecePos!!.col] == null){
+                            tempPosList.add(Position(selectedPiecePos!!.row+2,selectedPiecePos!!.col))
+                        }
+
+                        if(leftDownPiece != null && !isYourPiece(leftDownPiece.isWhite))
+                            tempPosList.add(Position(selectedPiecePos!!.row+1, selectedPiecePos!!.col-1))
+
+                        if(rightDownPiece != null && !isYourPiece(rightDownPiece.isWhite))
+                            tempPosList.add(Position(selectedPiecePos!!.row+1, selectedPiecePos!!.col+1))
+
+                        pointSquaresAsMovable(ArrayList(tempPosList))
+                    }
                 }
             }
         }
+    }
+
+    private fun isPawnAllowedToMove():Boolean {
+        if(selectedPiece!!.isWhite) {
+            if(selectedPiecePos!!.row != 0){
+                if(board[selectedPiecePos!!.row-1][selectedPiecePos!!.col] == null)
+                    return true
+
+                if(isThereAnyTakablePiece()){
+                    return true
+                }
+            }
+            else {
+                return false
+            }
+        }
+        else {
+            if(selectedPiecePos!!.row != 7){
+
+                if(board[selectedPiecePos!!.row+1][selectedPiecePos!!.col] == null)
+                    return true
+
+                if(isThereAnyTakablePiece()){
+                    return true
+                }
+
+            }
+            else {
+                return false
+            }
+        }
+
+        return false
+    }
+
+    private fun isThereAnyTakablePiece(): Boolean {
+        if(selectedPiece!!.isWhite) {
+
+            val leftUpPiece = if(selectedPiecePos!!.col != 0)
+                board[selectedPiecePos!!.row-1][selectedPiecePos!!.col-1]
+            else
+                null
+
+            val rightUpPiece = if(selectedPiecePos!!.col != 7)
+                board[selectedPiecePos!!.row-1][selectedPiecePos!!.col+1]
+            else
+                null
+
+            if(leftUpPiece != null && leftUpPiece.isWhite != isWhiteTurn)
+                return true
+
+            if(rightUpPiece != null && rightUpPiece.isWhite != isWhiteTurn)
+                return true
+
+        }
+        else {
+            val leftDownPiece = if(selectedPiecePos!!.col != 0)
+                board[selectedPiecePos!!.row+1][selectedPiecePos!!.col-1]
+            else
+                null
+
+            val rightDownPiece = if(selectedPiecePos!!.col != 7)
+                board[selectedPiecePos!!.row+1][selectedPiecePos!!.col+1]
+            else
+                null
+
+            if(leftDownPiece != null && leftDownPiece.isWhite != isWhiteTurn)
+                return true
+
+            if(rightDownPiece != null && rightDownPiece.isWhite != isWhiteTurn)
+                return true
+        }
+
+        return false
     }
 
     private fun pointSquaresAsMovable(positions: ArrayList<Position>){
@@ -187,7 +357,10 @@ class HomePageFragment : Fragment() {
         setMovableAreas(positions)
         for(position in positions){
             val view = binding.movablesLayer.getChildAt(position.row*8+position.col)
-            view?.setBackgroundResource(R.drawable.white_dot)
+            if(isWhiteTurn)
+                view?.setBackgroundResource(R.drawable.white_dot)
+            else
+                view?.setBackgroundResource(R.drawable.black_dot)
         }
         clearTempPosList()
     }
@@ -205,7 +378,7 @@ class HomePageFragment : Fragment() {
     }
 
     private fun passTurn(){
-        isWhiteTurn != isWhiteTurn
+        isWhiteTurn = !isWhiteTurn
     }
 
     private fun isYourPiece(isWhite:Boolean):Boolean{

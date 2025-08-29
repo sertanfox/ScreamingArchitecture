@@ -112,7 +112,6 @@ class HomePageFragment : Fragment() {
     }
 
     private fun clearPieceOldSquare() {
-        //TODO: Neden taşın ilk konumundaki görseli temizlemiyor?
         val index = selectedPiecePos!!.row*8+selectedPiecePos!!.col
         val view = binding.piecesTable.getChildAt(index)
         view!!.setBackgroundResource(0)
@@ -233,40 +232,40 @@ class HomePageFragment : Fragment() {
                     if(row == 0){
                         if(col == A) {
                             board[row][col] = Rook(isWhite = false)
-                            square.setImageResource(R.drawable.black_rook)
+                            square.setBackgroundResource(R.drawable.black_rook)
                         }
                         else if(col == B) {
                             board[row][col] = Knight(isWhite = false)
-                            square.setImageResource(R.drawable.black_knight)
+                            square.setBackgroundResource(R.drawable.black_knight)
                         }
                         else if(col == C) {
                             board[row][col] = Bishop(isWhite = false)
-                            square.setImageResource(R.drawable.black_bishop)
+                            square.setBackgroundResource(R.drawable.black_bishop)
                         }
                         else if(col == D) {
                             board[row][col] = King(isWhite = false)
-                            square.setImageResource(R.drawable.black_king)
+                            square.setBackgroundResource(R.drawable.black_king)
                         }
                         else if(col == E) {
                             board[row][col] = Queen(isWhite = false)
-                            square.setImageResource(R.drawable.black_queen)
+                            square.setBackgroundResource(R.drawable.black_queen)
                         }
                         else if(col == F) {
                             board[row][col] = Bishop(isWhite = false)
-                            square.setImageResource(R.drawable.black_bishop)
+                            square.setBackgroundResource(R.drawable.black_bishop)
                         }
                         else if(col == G) {
                             board[row][col] = Knight(isWhite = false)
-                            square.setImageResource(R.drawable.black_knight)
+                            square.setBackgroundResource(R.drawable.black_knight)
                         }
                         else if(col == H){
                             board[row][col] = Rook(isWhite = false)
-                            square.setImageResource(R.drawable.black_rook)
+                            square.setBackgroundResource(R.drawable.black_rook)
                         }
                     }
                     else if(row == 1) {
                         board[row][col] = Pawn(isWhite = false)
-                        square.setImageResource(R.drawable.black_pawn)
+                        square.setBackgroundResource(R.drawable.black_pawn)
                     }
 
                 }
@@ -275,41 +274,41 @@ class HomePageFragment : Fragment() {
                     if(row == 7){
                        if(col == A) {
                            board[row][col] = Rook(isWhite = true)
-                           square.setImageResource(R.drawable.white_rook)
+                           square.setBackgroundResource(R.drawable.white_rook)
                        }
                        else if(col == B) {
                            board[row][col] = Knight(isWhite = true)
-                           square.setImageResource(R.drawable.white_knight)
+                           square.setBackgroundResource(R.drawable.white_knight)
                        }
                        else if(col == C) {
                            board[row][col] = Bishop(isWhite = true)
-                           square.setImageResource(R.drawable.white_bishop)
+                           square.setBackgroundResource(R.drawable.white_bishop)
                        }
                        else if(col == D) {
                            board[row][col] = King(isWhite = true)
-                           square.setImageResource(R.drawable.white_king)
+                           square.setBackgroundResource(R.drawable.white_king)
                        }
                        else if(col == E) {
                            board[row][col] = Queen(isWhite = true)
-                           square.setImageResource(R.drawable.white_queen)
+                           square.setBackgroundResource(R.drawable.white_queen)
                        }
                        else if(col == F) {
                            board[row][col] = Bishop(isWhite = true)
-                           square.setImageResource(R.drawable.white_bishop)
+                           square.setBackgroundResource(R.drawable.white_bishop)
                        }
                        else if(col == G) {
                            board[row][col] = King(isWhite = true)
-                           square.setImageResource(R.drawable.white_knight)
+                           square.setBackgroundResource(R.drawable.white_knight)
                        }
                        else if(col == H) {
                            board[row][col] = Rook(isWhite = true)
-                           square.setImageResource(R.drawable.white_rook)
+                           square.setBackgroundResource(R.drawable.white_rook)
                        }
 
                     }
                     else if(row == 6) {
                         board[row][col] = Pawn(isWhite = true)
-                        square.setImageResource(R.drawable.white_pawn)
+                        square.setBackgroundResource(R.drawable.white_pawn)
                     }
 
                 }

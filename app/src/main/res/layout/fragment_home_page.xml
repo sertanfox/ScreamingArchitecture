@@ -15,6 +15,65 @@
         android:background="@color/background"
         tools:context=".presentation.fragments.HomePageFragment">
 
+        <TextView
+            android:id="@+id/selectPiece"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:text="Bir taş seçiniz"
+            android:background="@color/white"
+            android:textColor="@color/material_on_primary_emphasis_high_type"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/pieceSelectionLayout"
+            />
+
+        <LinearLayout
+            android:id="@+id/pieceSelectionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/chessBoard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:gravity="center"
+            android:background="@color/white"
+            >
+            <ImageView
+                android:id="@+id/selectRook"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                tools:src="@drawable/white_rook"
+                />
+            <ImageView
+                android:id="@+id/selectKnight"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                tools:src="@drawable/white_knight"
+                />
+            <ImageView
+                android:id="@+id/selectBishop"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                tools:src="@drawable/white_bishop"
+                />
+            <ImageView
+                android:id="@+id/selectQueen"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                tools:src="@drawable/white_queen"
+                />
+        </LinearLayout>
+
         <GridLayout
             android:id="@+id/chessBoard"
             android:layout_width="0dp"

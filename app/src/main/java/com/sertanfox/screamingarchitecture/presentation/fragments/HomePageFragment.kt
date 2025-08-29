@@ -55,8 +55,48 @@ class HomePageFragment : Fragment() {
         setupChessBoard()
         setupPiecesTable()
         setupMovablesLayer()
+        setupPieceSelection()
         startTheGame()
         return binding.root
+    }
+
+    private fun setupPieceSelection() {
+        binding.selectRook.setOnClickListener {
+            hidePieceSelection()
+            clearPieceSelection()
+            passTurn()
+        }
+        binding.selectKnight.setOnClickListener {
+            hidePieceSelection()
+            clearPieceSelection()
+            passTurn()
+        }
+        binding.selectBishop.setOnClickListener {
+            hidePieceSelection()
+            clearPieceSelection()
+            passTurn()
+        }
+        binding.selectQueen.setOnClickListener {
+            setQueenOnTable()
+            hidePieceSelection()
+            clearPieceSelection()
+            passTurn()
+        }
+    }
+
+    private fun setQueenOnTable() {
+        if(selectedPiece!!.isWhite) {
+            board[selectedPiecePos!!.row][selectedPiecePos!!.col] = Queen(isWhite = true)
+            val index = selectedPiecePos!!.row*8+selectedPiecePos!!.col
+            val view = binding.piecesTable.getChildAt(index)
+            view?.setBackgroundResource(R.drawable.white_queen)
+        }
+        else {
+            board[selectedPiecePos!!.row][selectedPiecePos!!.col] = Queen(isWhite = false)
+            val index = selectedPiecePos!!.row*8+selectedPiecePos!!.col
+            val view = binding.piecesTable.getChildAt(index)
+            view?.setBackgroundResource(R.drawable.black_queen)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -113,8 +153,24 @@ class HomePageFragment : Fragment() {
         clearMovableAreas()
         clearPieceOldSquare()
         setPieceNewSquare(newPosition)
-        clearPieceSelection()
-        passTurn()
+        if(isThereAnyPawnWins(newPosition)){
+            showPieceSelection()
+        } else {
+            clearPieceSelection()
+            passTurn()
+        }
+    }
+
+    private fun isThereAnyPawnWins(position: Position): Boolean {
+        val playedPiece = board[position.row][position.col]
+
+        if(playedPiece!!.isWhite && position.row == 0)
+            return true
+        else if(!playedPiece.isWhite && position.row == 7){
+            return true
+        }
+
+        return false
     }
 
     private fun clearPieceSelection() {
@@ -135,6 +191,8 @@ class HomePageFragment : Fragment() {
         view?.setBackgroundResource(pieceTypeImage())
         selectedPiece?.isEverMoved = true
         board[newPos.row][newPos.col] = selectedPiece
+        selectedPiece = board[newPos.row][newPos.col]
+        selectedPiecePos = Position(newPos.row,newPos.col)
     }
 
     private fun pieceTypeImage(): Int {
@@ -276,6 +334,27 @@ class HomePageFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun showPieceSelection(){
+        if(selectedPiece!!.isWhite){
+            binding.selectRook.setBackgroundResource(R.drawable.white_rook)
+            binding.selectKnight.setBackgroundResource(R.drawable.white_knight)
+            binding.selectBishop.setBackgroundResource(R.drawable.white_bishop)
+            binding.selectQueen.setBackgroundResource(R.drawable.white_queen)
+        } else {
+            binding.selectRook.setBackgroundResource(R.drawable.black_rook)
+            binding.selectKnight.setBackgroundResource(R.drawable.black_knight)
+            binding.selectBishop.setBackgroundResource(R.drawable.black_bishop)
+            binding.selectQueen.setBackgroundResource(R.drawable.black_queen)
+        }
+        binding.pieceSelectionLayout.visibility = View.VISIBLE
+        binding.selectPiece.visibility = View.VISIBLE
+    }
+
+    private fun hidePieceSelection() {
+        binding.pieceSelectionLayout.visibility = View.GONE
+        binding.selectPiece.visibility = View.GONE
     }
 
     private fun isPawnAllowedToMove():Boolean {

@@ -23,28 +23,30 @@ import com.sertanfox.screamingarchitecture.pieces.Queen
 import com.sertanfox.screamingarchitecture.pieces.Rook
 import com.sertanfox.screamingarchitecture.presentation.viewmodels.HomePageViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.graphics.toColorInt
+
+//region Table Letters
+private const val A = 0
+private const val B = 1
+private const val C = 2
+private const val D = 3
+private const val E = 4
+private const val F = 5
+private const val G = 6
+private const val H = 7
+//endregion
 
 @AndroidEntryPoint
 class HomePageFragment : Fragment() {
     private lateinit var binding : FragmentHomePageBinding
     private val viewModel : HomePageViewModel by viewModels()
-    //region Table Letters
-    private val A = 0
-    private val B = 1
-    private val C = 2
-    private val D = 3
-    private val E = 4
-    private val F = 5
-    private val G = 6
-    private val H = 7
-    //endregion
 
     private var tempPosList: ArrayList<Position> = arrayListOf()
     private var movableAreas: ArrayList<Position> = arrayListOf()
-    val board: Array<Array<Piece?>> = Array(8) { arrayOfNulls<Piece>(8) }
-    var isWhiteTurn = true
-    var selectedPiece: Piece? = null
-    var selectedPiecePos: Position? = null
+    private val board: Array<Array<Piece?>> = Array(8) { arrayOfNulls(8) }
+    private var isWhiteTurn = true
+    private var selectedPiece: Piece? = null
+    private var selectedPiecePos: Position? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -452,10 +454,6 @@ class HomePageFragment : Fragment() {
         movableAreas = ArrayList(positionList)
     }
 
-    private fun addToMovableAreasList(position: Position){
-        movableAreas.add(position)
-    }
-
     private fun passTurn(){
         isWhiteTurn = !isWhiteTurn
     }
@@ -480,85 +478,89 @@ class HomePageFragment : Fragment() {
                 }
 
                 if(row < 2){
-                    //siyah
+                    //black
                     if(row == 0){
-                        if(col == A) {
-                            board[row][col] = Rook(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_rook)
-                        }
-                        else if(col == B) {
-                            board[row][col] = Knight(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_knight)
-                        }
-                        else if(col == C) {
-                            board[row][col] = Bishop(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_bishop)
-                        }
-                        else if(col == D) {
-                            board[row][col] = King(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_king)
-                        }
-                        else if(col == E) {
-                            board[row][col] = Queen(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_queen)
-                        }
-                        else if(col == F) {
-                            board[row][col] = Bishop(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_bishop)
-                        }
-                        else if(col == G) {
-                            board[row][col] = Knight(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_knight)
-                        }
-                        else if(col == H){
-                            board[row][col] = Rook(isWhite = false)
-                            square.setBackgroundResource(R.drawable.black_rook)
+                        when (col) {
+                            A -> {
+                                board[row][col] = Rook(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_rook)
+                            }
+                            B -> {
+                                board[row][col] = Knight(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_knight)
+                            }
+                            C -> {
+                                board[row][col] = Bishop(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_bishop)
+                            }
+                            D -> {
+                                board[row][col] = King(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_king)
+                            }
+                            E -> {
+                                board[row][col] = Queen(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_queen)
+                            }
+                            F -> {
+                                board[row][col] = Bishop(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_bishop)
+                            }
+                            G -> {
+                                board[row][col] = Knight(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_knight)
+                            }
+                            H -> {
+                                board[row][col] = Rook(isWhite = false)
+                                square.setBackgroundResource(R.drawable.black_rook)
+                            }
                         }
                     }
-                    else if(row == 1) {
+                    else /*if(row == 1)*/ {
                         board[row][col] = Pawn(isWhite = false)
                         square.setBackgroundResource(R.drawable.black_pawn)
                     }
 
                 }
                 else if(row > 5){
-                    //beyaz
+                    //white
                     if(row == 7){
-                       if(col == A) {
-                           board[row][col] = Rook(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_rook)
-                       }
-                       else if(col == B) {
-                           board[row][col] = Knight(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_knight)
-                       }
-                       else if(col == C) {
-                           board[row][col] = Bishop(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_bishop)
-                       }
-                       else if(col == D) {
-                           board[row][col] = King(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_king)
-                       }
-                       else if(col == E) {
-                           board[row][col] = Queen(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_queen)
-                       }
-                       else if(col == F) {
-                           board[row][col] = Bishop(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_bishop)
-                       }
-                       else if(col == G) {
-                           board[row][col] = King(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_knight)
-                       }
-                       else if(col == H) {
-                           board[row][col] = Rook(isWhite = true)
-                           square.setBackgroundResource(R.drawable.white_rook)
-                       }
+                        when (col) {
+                            A -> {
+                                board[row][col] = Rook(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_rook)
+                            }
+                            B -> {
+                                board[row][col] = Knight(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_knight)
+                            }
+                            C -> {
+                                board[row][col] = Bishop(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_bishop)
+                            }
+                            D -> {
+                                board[row][col] = King(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_king)
+                            }
+                            E -> {
+                                board[row][col] = Queen(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_queen)
+                            }
+                            F -> {
+                                board[row][col] = Bishop(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_bishop)
+                            }
+                            G -> {
+                                board[row][col] = King(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_knight)
+                            }
+                            H -> {
+                                board[row][col] = Rook(isWhite = true)
+                                square.setBackgroundResource(R.drawable.white_rook)
+                            }
+                        }
 
                     }
-                    else if(row == 6) {
+                    else /*if(row == 6)*/ {
                         board[row][col] = Pawn(isWhite = true)
                         square.setBackgroundResource(R.drawable.white_pawn)
                     }
@@ -614,7 +616,7 @@ class HomePageFragment : Fragment() {
                 }
 
                 square.setBackgroundColor(
-                    Color.parseColor("#00FFFFFF")
+                    "#00FFFFFF".toColorInt()
                 )
 
                 square.layoutParams = params
@@ -623,33 +625,32 @@ class HomePageFragment : Fragment() {
         }
     }
 
-
     private fun initDataBinding(){
         binding.viewModel = viewModel
     }
     //endregion
 }
 
-class PieceType(val id: Int) {
+class PieceType {
     companion object Companion {
-        val PAWN = PieceType(0)
-        val ROOK = PieceType(1)
-        val KNIGHT = PieceType(2)
-        val BISHOP = PieceType(3)
-        val QUEEN = PieceType(4)
-        val KING = PieceType(5)
+        val PAWN = PieceType()
+        val ROOK = PieceType()
+        val KNIGHT = PieceType()
+        val BISHOP = PieceType()
+        val QUEEN = PieceType()
+        val KING = PieceType()
     }
 }
 
-class MoveRotation(val id: Int) {
+class MoveRotation {
     companion object Companion {
-        val LEFT = MoveRotation(0)
-        val RIGHT = MoveRotation(1)
-        val UP = MoveRotation(2)
-        val DOWN = MoveRotation(3)
-        val LEFT_UP = MoveRotation(4)
-        val RIGHT_UP = MoveRotation(5)
-        val LEFT_DOWN = MoveRotation(6)
-        val RIGHT_DOWN = MoveRotation(7)
+        val LEFT = MoveRotation()
+        val RIGHT = MoveRotation()
+        val UP = MoveRotation()
+        val DOWN = MoveRotation()
+        val LEFT_UP = MoveRotation()
+        val RIGHT_UP = MoveRotation()
+        val LEFT_DOWN = MoveRotation()
+        val RIGHT_DOWN = MoveRotation()
     }
 }
